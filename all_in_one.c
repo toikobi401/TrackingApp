@@ -1,14 +1,14 @@
 /*
  * Device Tracker - All-In-One Installer & Tracker
  * 
- * File .exe DUY NHẤT để:
- * - Tự động tải và cài đặt tất cả dependencies
- * - Cài đặt chương trình vào hệ thống
- * - Chạy tracker gửi email
- * - Gỡ cài đặt hoàn toàn
+ * Single .exe file to:
+ * - Automatically download and install all dependencies
+ * - Install program into system
+ * - Run tracker and send email
+ * - Complete uninstallation
  * 
- * KHÔNG CẦN bất kỳ file khác!
- * Chỉ cần chạy với quyền Administrator
+ * NO OTHER FILES NEEDED!
+ * Just run with Administrator privileges
  */
 
 #include <stdio.h>
@@ -65,17 +65,17 @@ void request_location_permission();
 // TẢI CA BUNDLE BẰNG CURL
 // ============================================
 int download_ca_bundle(const char *output_path) {
-    printf("  • Đang tải CA Bundle từ %s...\n", CA_BUNDLE_URL);
+    printf("  • Downloading CA Bundle from %s...\n", CA_BUNDLE_URL);
     
     CURL *curl = curl_easy_init();
     if (!curl) {
-        printf("  ✗ Không thể khởi tạo curl\n");
+        printf("  ✗ Cannot initialize curl\n");
         return 0;
     }
     
     FILE *fp = fopen(output_path, "wb");
     if (!fp) {
-        printf("  ✗ Không thể tạo file\n");
+        printf("  ✗ Cannot create file\n");
         curl_easy_cleanup(curl);
         return 0;
     }
@@ -92,12 +92,12 @@ int download_ca_bundle(const char *output_path) {
     curl_easy_cleanup(curl);
     
     if (res != CURLE_OK) {
-        printf("  ✗ Lỗi tải: %s\n", curl_easy_strerror(res));
+        printf("  ✗ Download error: %s\n", curl_easy_strerror(res));
         DeleteFileA(output_path);
         return 0;
     }
     
-    printf("  ✓ Tải CA Bundle thành công\n");
+    printf("  ✓ CA Bundle downloaded successfully\n");
     return 1;
 }
 
@@ -127,86 +127,86 @@ int ensure_dependencies() {
     char curl_dll[512];
     snprintf(curl_dll, sizeof(curl_dll), "%s\\curl-8.11.1_1-win64-mingw\\bin\\libcurl-x64.dll", exe_dir);
     
-    printf("\n=== KIỂM TRA DEPENDENCIES ===\n\n");
+    printf("\n=== CHECKING DEPENDENCIES ===\n\n");
     
-    // Tạo thư mục INSTALL_DIR nếu chưa có
+    // Create INSTALL_DIR if not exists
     CreateDirectoryA(INSTALL_DIR, NULL);
     
-    // 1. Kiểm tra libcurl DLL
+    // 1. Check libcurl DLL
     printf("1. libcurl-x64.dll:\n");
     if (GetFileAttributesA(dll_path) != INVALID_FILE_ATTRIBUTES) {
-        printf("  ✓ Đã có sẵn trong %s\n", INSTALL_DIR);
+        printf("  ✓ Already available in %s\n", INSTALL_DIR);
     } else {
-        printf("  • Chưa có trong thư mục cài đặt\n");
-        printf("  • Đang tìm kiếm...\n");
+        printf("  • Not found in installation folder\n");
+        printf("  • Searching...\n");
         
-        // Thử copy từ thư mục hiện tại
+        // Try copy from current directory
         if (GetFileAttributesA(local_dll) != INVALID_FILE_ATTRIBUTES) {
-            printf("  • Tìm thấy trong thư mục hiện tại, đang copy...\n");
+            printf("  • Found in current directory, copying...\n");
             if (CopyFileA(local_dll, dll_path, FALSE)) {
-                printf("  ✓ Copy thành công\n");
+                printf("  ✓ Copied successfully\n");
             } else {
-                printf("  ✗ Không thể copy: %lu\n", GetLastError());
+                printf("  ✗ Cannot copy: %lu\n", GetLastError());
                 return 0;
             }
         }
-        // Thử copy từ thư mục curl
+        // Try copy from curl directory
         else if (GetFileAttributesA(curl_dll) != INVALID_FILE_ATTRIBUTES) {
-            printf("  • Tìm thấy trong thư mục curl, đang copy...\n");
+            printf("  • Found in curl directory, copying...\n");
             if (CopyFileA(curl_dll, dll_path, FALSE)) {
-                printf("  ✓ Copy thành công\n");
+                printf("  ✓ Copied successfully\n");
             } else {
-                printf("  ✗ Không thể copy: %lu\n", GetLastError());
+                printf("  ✗ Cannot copy: %lu\n", GetLastError());
                 return 0;
             }
         } else {
             printf("\n");
             printf("  ╔═══════════════════════════════════════════════╗\n");
-            printf("  ║  ✗ KHÔNG TÌM THẤY libcurl-x64.dll            ║\n");
+            printf("  ║  ✗ libcurl-x64.dll NOT FOUND                 ║\n");
             printf("  ╚═══════════════════════════════════════════════╝\n");
             printf("\n");
-            printf("  Vui lòng:\n");
-            printf("  1. Đặt file 'libcurl-x64.dll' vào thư mục:\n");
+            printf("  Please:\n");
+            printf("  1. Place 'libcurl-x64.dll' file in folder:\n");
             printf("     %s\n", exe_dir);
-            printf("  2. HOẶC đảm bảo thư mục 'curl-8.11.1_1-win64-mingw' tồn tại\n");
+            printf("  2. OR ensure 'curl-8.11.1_1-win64-mingw' folder exists\n");
             printf("\n");
-            printf("  File DLL có thể lấy từ:\n");
-            printf("  • Thư mục curl-8.11.1_1-win64-mingw\\bin\\\n");
-            printf("  • Download từ: https://curl.se/windows/\n");
+            printf("  DLL file can be obtained from:\n");
+            printf("  • curl-8.11.1_1-win64-mingw\\bin\\ folder\n");
+            printf("  • Download from: https://curl.se/windows/\n");
             printf("\n");
             return 0;
         }
     }
     
-    // 2. Kiểm tra CA Bundle
+    // 2. Check CA Bundle
     printf("\n2. curl-ca-bundle.crt:\n");
     if (GetFileAttributesA(ca_path) != INVALID_FILE_ATTRIBUTES) {
-        printf("  ✓ Đã có sẵn\n");
+        printf("  ✓ Already available\n");
     } else {
-        printf("  • Chưa có\n");
+        printf("  • Not found\n");
         
-        // Thử copy từ thư mục hiện tại
+        // Try copy from current directory
         if (GetFileAttributesA(local_ca) != INVALID_FILE_ATTRIBUTES) {
-            printf("  • Tìm thấy trong thư mục hiện tại, đang copy...\n");
+            printf("  • Found in current directory, copying...\n");
             if (CopyFileA(local_ca, ca_path, FALSE)) {
-                printf("  ✓ Copy thành công\n");
+                printf("  ✓ Copied successfully\n");
             } else {
-                printf("  ✗ Không thể copy, đang thử tải từ internet...\n");
+                printf("  ✗ Cannot copy, trying to download from internet...\n");
                 if (!download_ca_bundle(ca_path)) {
-                    printf("  ⚠ CẢNH BÁO: Không có CA Bundle\n");
-                    printf("  → Chương trình vẫn chạy nhưng SSL có thể gặp vấn đề\n");
+                    printf("  ⚠ WARNING: No CA Bundle\n");
+                    printf("  → Program will run but SSL may have issues\n");
                 }
             }
         } else {
-            printf("  • Đang tải từ internet...\n");
+            printf("  • Downloading from internet...\n");
             if (!download_ca_bundle(ca_path)) {
-                printf("  ⚠ CẢNH BÁO: Không thể tải CA Bundle\n");
-                printf("  → Chương trình vẫn chạy nhưng SSL có thể gặp vấn đề\n");
+                printf("  ⚠ WARNING: Cannot download CA Bundle\n");
+                printf("  → Program will run but SSL may have issues\n");
             }
         }
     }
     
-    printf("\n✓ Kiểm tra hoàn tất!\n");
+    printf("\n✓ Check complete!\n");
     return 1;
 }
 
@@ -376,23 +376,23 @@ int get_location_from_ip(const char *ip, char *location, size_t size) {
 }
 
 void request_location_permission() {
-    printf("\n=== YÊU CẦU QUYỀN TRUY CẬP VÍ TRÍ ===\n\n");
-    printf("Để có độ chính xác cao nhất, vui lòng:\n");
-    printf("1. Mở Windows Settings\n");
-    printf("2. Vào Privacy & Security → Location\n");
-    printf("3. Bật 'Location services'\n");
-    printf("4. Bật 'Let apps access your location'\n\n");
+    printf("\n=== LOCATION ACCESS PERMISSION REQUIRED ===\n\n");
+    printf("For highest accuracy, please:\n");
+    printf("1. Open Windows Settings\n");
+    printf("2. Go to Privacy & Security → Location\n");
+    printf("3. Enable 'Location services'\n");
+    printf("4. Enable 'Let apps access your location'\n\n");
     
-    printf("Đang mở Windows Settings...\n");
+    printf("Opening Windows Settings...\n");
     system("start ms-settings:privacy-location");
     
-    printf("\nSau khi bật, nhấn Enter để tiếp tục...");
+    printf("\nAfter enabling, press Enter to continue...");
     getchar();
 }
 
 int get_gps_location(double *latitude, double *longitude) {
 #ifdef _WIN32
-    printf("  • Đang lấy vị trí GPS (có thể mất 5-10 giây)...\n");
+    printf("  • Getting GPS location (may take 5-10 seconds)...\n");
     
     FILE *fp = _popen(
         "powershell -NoProfile -Command \""
@@ -415,7 +415,7 @@ int get_gps_location(double *latitude, double *longitude) {
             line1[strcspn(line1, "\r\n")] = 0;
             if (strcmp(line1, "UNKNOWN") == 0) {
                 _pclose(fp);
-                printf("  • GPS không khả dụng, sử dụng IP location\n");
+                printf("  • GPS unavailable, using IP location\n");
                 return 0;
             }
             
@@ -466,7 +466,7 @@ void get_timestamp(char *timestamp, size_t size) {
 // THU THẬP THÔNG TIN THIẾT BỊ
 // ============================================
 void collect_device_info(DeviceInfo *info) {
-    printf("\n=== THU THẬP THÔNG TIN THIẾT BỊ ===\n\n");
+    printf("\n=== COLLECTING DEVICE INFO ===\n\n");
     
     get_hostname(info->hostname, sizeof(info->hostname));
     printf("✓ Hostname: %s\n", info->hostname);
@@ -481,31 +481,31 @@ void collect_device_info(DeviceInfo *info) {
         printf("✓ IP: %s\n", info->ip_address);
     } else {
         strcpy(info->ip_address, "Unknown");
-        printf("✗ Không lấy được IP\n");
+        printf("✗ Cannot get IP\n");
     }
     
     get_mac_address(info->mac_address, sizeof(info->mac_address));
     printf("✓ MAC: %s\n", info->mac_address);
     
-    printf("\n=== LẤY VỊ TRÍ ===\n\n");
+    printf("\n=== GETTING LOCATION ===\n\n");
     
     double lat = 0, lon = 0;
     int has_gps = get_gps_location(&lat, &lon);
     
     if (has_gps) {
         snprintf(info->location, sizeof(info->location), 
-                 "GPS: %.6f, %.6f (Chính xác)", lat, lon);
+                 "GPS: %.6f, %.6f (Accurate)", lat, lon);
     } else {
         if (get_location_from_ip(info->ip_address, info->location, sizeof(info->location))) {
-            printf("✓ Vị trí từ IP: %s\n", info->location);
+            printf("✓ Location from IP: %s\n", info->location);
         } else {
             strcpy(info->location, "Unknown");
-            printf("✗ Không lấy được vị trí\n");
+            printf("✗ Cannot get location\n");
         }
     }
     
     get_timestamp(info->timestamp, sizeof(info->timestamp));
-    printf("✓ Thời gian: %s\n", info->timestamp);
+    printf("✓ Time: %s\n", info->timestamp);
 }
 
 // ============================================
@@ -517,25 +517,25 @@ int send_email(const DeviceInfo *info) {
     struct curl_slist *recipients = NULL;
     struct upload_status upload_ctx;
     
-    printf("\n=== GỬI EMAIL ===\n\n");
+    printf("\n=== SENDING EMAIL ===\n\n");
     
-    // Tạo email content
+    // Create email content
     char subject[256];
-    snprintf(subject, sizeof(subject), "[Device Tracker] Thiết bị %s đã khởi động", info->hostname);
+    snprintf(subject, sizeof(subject), "[Device Tracker] Device %s has started", info->hostname);
     
     char body[2048];
     snprintf(body, sizeof(body),
-        "=== THÔNG TIN THIẾT BỊ ===\r\n\r\n"
-        "Tên thiết bị: %s\r\n"
-        "Người dùng: %s\r\n"
-        "Hệ điều hành: %s\r\n"
-        "Địa chỉ IP: %s\r\n"
+        "=== DEVICE INFORMATION ===\r\n\r\n"
+        "Device name: %s\r\n"
+        "User: %s\r\n"
+        "Operating system: %s\r\n"
+        "IP address: %s\r\n"
         "MAC Address: %s\r\n"
-        "Vị trí: %s\r\n"
-        "Thời gian: %s\r\n\r\n"
-        "Link Google Maps: https://www.google.com/maps?q=%s\r\n\r\n"
+        "Location: %s\r\n"
+        "Time: %s\r\n\r\n"
+        "Google Maps Link: https://www.google.com/maps?q=%s\r\n\r\n"
         "---\r\n"
-        "Email này được gửi tự động bởi Device Tracker\r\n",
+        "This email was sent automatically by Device Tracker\r\n",
         info->hostname, info->username, info->os_info,
         info->ip_address, info->mac_address, info->location,
         info->timestamp, info->location
@@ -588,13 +588,13 @@ int send_email(const DeviceInfo *info) {
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
         
-        printf("Đang gửi đến %s...\n", EMAIL_TO);
+        printf("Sending to %s...\n", EMAIL_TO);
         res = curl_easy_perform(curl);
         
         if (res != CURLE_OK) {
-            printf("✗ Lỗi: %s\n", curl_easy_strerror(res));
+            printf("✗ Error: %s\n", curl_easy_strerror(res));
         } else {
-            printf("✓ Gửi email thành công!\n");
+            printf("✓ Email sent successfully!\n");
         }
         
         curl_slist_free_all(recipients);
@@ -612,24 +612,24 @@ int run_tracker() {
     
     printf("\n");
     printf("╔════════════════════════════════════════╗\n");
-    printf("║         CHẠY DEVICE TRACKER            ║\n");
+    printf("║         RUN DEVICE TRACKER             ║\n");
     printf("╚════════════════════════════════════════╝\n");
     
-    // Đảm bảo dependencies
+    // Ensure dependencies
     if (!ensure_dependencies()) {
-        printf("\n✗ Thiếu dependencies cần thiết!\n");
+        printf("\n✗ Missing required dependencies!\n");
         return 0;
     }
     
-    // Thu thập thông tin
+    // Collect info
     collect_device_info(&info);
     
-    // Gửi email
+    // Send email
     if (send_email(&info)) {
-        printf("\n✓ HOÀN TẤT! Email đã được gửi.\n");
+        printf("\n✓ COMPLETE! Email has been sent.\n");
         return 1;
     } else {
-        printf("\n✗ Có lỗi khi gửi email.\n");
+        printf("\n✗ Error sending email.\n");
         return 0;
     }
 }
@@ -640,36 +640,61 @@ int run_tracker() {
 int install_startup() {
     printf("\n");
     printf("╔════════════════════════════════════════╗\n");
-    printf("║      CÀI ĐẶT AUTO-START TRACKER        ║\n");
+    printf("║      INSTALL AUTO-START TRACKER         ║\n");
     printf("╚════════════════════════════════════════╝\n");
     
-    printf("\n=== BƯỚC 1: ĐẢM BẢO DEPENDENCIES ===\n");
+    printf("\n=== STEP 1: ENSURE DEPENDENCIES ===\n");
     
     if (!ensure_dependencies()) {
-        printf("\n✗ Không thể cài đặt do thiếu dependencies!\n");
+        printf("\n✗ Cannot install due to missing dependencies!\n");
         return 0;
     }
     
-    printf("\n=== BƯỚC 2: COPY FILE THỰC THI ===\n");
+    printf("\n=== STEP 2: COPY EXECUTABLE FILE ===\n");
     
     // Lấy đường dẫn của file .exe hiện tại
     char current_exe[MAX_PATH];
     GetModuleFileNameA(NULL, current_exe, MAX_PATH);
     
+    // Tạo đường dẫn Silent version
+    char exe_dir[MAX_PATH];
+    strcpy(exe_dir, current_exe);
+    char *last_slash = strrchr(exe_dir, '\\');
+    if (last_slash) *last_slash = '\0';
+    
+    char silent_exe[MAX_PATH];
+    snprintf(silent_exe, sizeof(silent_exe), "%s\\All_In_One_Silent.exe", exe_dir);
+    
     char install_exe[512];
-    snprintf(install_exe, sizeof(install_exe), "%s\\All_In_One.exe", INSTALL_DIR);
+    snprintf(install_exe, sizeof(install_exe), "%s\\All_In_One_Silent.exe", INSTALL_DIR);
     
-    printf("  Copy từ: %s\n", current_exe);
-    printf("  Copy đến: %s\n", install_exe);
-    
-    if (CopyFileA(current_exe, install_exe, FALSE)) {
-        printf("  ✓ Copy thành công\n");
+    // Check if Silent version exists
+    if (GetFileAttributesA(silent_exe) != INVALID_FILE_ATTRIBUTES) {
+        printf("  Copy from: %s\n", silent_exe);
+        printf("  Copy to: %s\n", install_exe);
+        
+        if (CopyFileA(silent_exe, install_exe, FALSE)) {
+            printf("  ✓ All_In_One_Silent.exe copied successfully\n");
+        } else {
+            printf("  ✗ Cannot copy Silent.exe file\n");
+            return 0;
+        }
     } else {
-        printf("  ✗ Không thể copy file .exe\n");
-        return 0;
+        // Fallback: copy current file if no Silent version
+        printf("  ⚠ All_In_One_Silent.exe not found\n");
+        printf("  → Using current file: %s\n", current_exe);
+        
+        snprintf(install_exe, sizeof(install_exe), "%s\\All_In_One.exe", INSTALL_DIR);
+        
+        if (CopyFileA(current_exe, install_exe, FALSE)) {
+            printf("  ✓ Copied successfully\n");
+        } else {
+            printf("  ✗ Cannot copy .exe file\n");
+            return 0;
+        }
     }
     
-    printf("\n=== BƯỚC 3: TẠO TASK SCHEDULER ===\n");
+    printf("\n=== STEP 3: CREATE TASK SCHEDULER ===\n");
     
     // Xóa task cũ nếu có
     char cmd[1024];
@@ -687,21 +712,21 @@ int install_startup() {
     int result = system(cmd);
     
     if (result == 0) {
-        printf("  ✓ Tạo Task Scheduler thành công\n");
+        printf("  ✓ Task Scheduler created successfully\n");
         printf("\n");
         printf("╔════════════════════════════════════════╗\n");
-        printf("║      CÀI ĐẶT THÀNH CÔNG! ✓             ║\n");
+        printf("║      INSTALLATION SUCCESSFUL! ✓          ║\n");
         printf("╚════════════════════════════════════════╝\n");
         printf("\n");
-        printf("Từ giờ, mỗi khi Windows khởi động:\n");
-        printf("  • Chương trình tự động chạy sau 30 giây\n");
-        printf("  • Thu thập thông tin thiết bị và vị trí\n");
-        printf("  • Gửi email đến %s\n", EMAIL_TO);
-        printf("  • Chạy hoàn toàn IM LẶNG trong nền\n");
+        printf("From now on, every time Windows starts:\n");
+        printf("  • Program auto-runs after 30 seconds\n");
+        printf("  • Collects device and location info\n");
+        printf("  • Sends email to %s\n", EMAIL_TO);
+        printf("  • Runs completely SILENT in background\n");
         printf("\n");
         return 1;
     } else {
-        printf("  ✗ Không thể tạo Task Scheduler\n");
+        printf("  ✗ Cannot create Task Scheduler\n");
         return 0;
     }
 }
@@ -712,32 +737,32 @@ int install_startup() {
 int uninstall_startup() {
     printf("\n");
     printf("╔════════════════════════════════════════╗\n");
-    printf("║           GỠ CÀI ĐẶT TRACKER           ║\n");
+    printf("║           UNINSTALL TRACKER            ║\n");
     printf("╚════════════════════════════════════════╝\n");
     
-    printf("\n1. Xóa Task Scheduler...\n");
+    printf("\n1. Delete Task Scheduler...\n");
     char cmd[512];
     snprintf(cmd, sizeof(cmd), "schtasks /Delete /TN \"%s\" /F", TASK_NAME);
     
     int result = system(cmd);
     if (result == 0) {
-        printf("  ✓ Đã xóa Task\n");
+        printf("  ✓ Task deleted\n");
     } else {
-        printf("  • Task không tồn tại\n");
+        printf("  • Task does not exist\n");
     }
     
-    printf("\n2. Xóa file cài đặt...\n");
-    printf("  Xóa thư mục: %s\n", INSTALL_DIR);
+    printf("\n2. Delete installation files...\n");
+    printf("  Deleting folder: %s\n", INSTALL_DIR);
     
     char rmdir_cmd[512];
     snprintf(rmdir_cmd, sizeof(rmdir_cmd), "rmdir /S /Q \"%s\" 2>nul", INSTALL_DIR);
     system(rmdir_cmd);
     
-    printf("  ✓ Đã xóa file\n");
+    printf("  ✓ Files deleted\n");
     
     printf("\n");
     printf("╔════════════════════════════════════════╗\n");
-    printf("║       GỠ CÀI ĐẶT THÀNH CÔNG! ✓         ║\n");
+    printf("║       UNINSTALL SUCCESSFUL! ✓          ║\n");
     printf("╚════════════════════════════════════════╝\n");
     printf("\n");
     
@@ -750,25 +775,25 @@ int uninstall_startup() {
 void check_status() {
     printf("\n");
     printf("╔════════════════════════════════════════╗\n");
-    printf("║         TRẠNG THÁI HỆ THỐNG            ║\n");
+    printf("║           SYSTEM STATUS                ║\n");
     printf("╚════════════════════════════════════════╝\n");
     printf("\n");
     
-    // Kiểm tra quyền Admin
-    printf("1. Quyền Administrator:\n");
+    // Check Admin privileges
+    printf("1. Administrator privileges:\n");
     if (check_admin()) {
-        printf("  ✓ Đang chạy với quyền Admin\n");
+        printf("  ✓ Running with Admin rights\n");
     } else {
-        printf("  ✗ KHÔNG có quyền Admin\n");
-        printf("  → Vui lòng chạy lại với 'Run as Administrator'\n");
+        printf("  ✗ NO Admin rights\n");
+        printf("  → Please run again with 'Run as Administrator'\n");
     }
     
-    // Kiểm tra thư mục cài đặt
-    printf("\n2. Thư mục cài đặt:\n");
+    // Check installation directory
+    printf("\n2. Installation folder:\n");
     if (GetFileAttributesA(INSTALL_DIR) != INVALID_FILE_ATTRIBUTES) {
-        printf("  ✓ Tồn tại: %s\n", INSTALL_DIR);
+        printf("  ✓ Exists: %s\n", INSTALL_DIR);
         
-        // Kiểm tra các file
+        // Check files
         char dll_path[512], ca_path[512], exe_path[512];
         snprintf(dll_path, sizeof(dll_path), "%s\\libcurl-x64.dll", INSTALL_DIR);
         snprintf(ca_path, sizeof(ca_path), "%s\\curl-ca-bundle.crt", INSTALL_DIR);
@@ -781,31 +806,31 @@ void check_status() {
         printf("    • All_In_One.exe: %s\n", 
                GetFileAttributesA(exe_path) != INVALID_FILE_ATTRIBUTES ? "✓" : "✗");
     } else {
-        printf("  ✗ Chưa tồn tại\n");
+        printf("  ✗ Does not exist\n");
     }
     
-    // Kiểm tra Task Scheduler
+    // Check Task Scheduler
     printf("\n3. Task Scheduler:\n");
     char cmd[512];
     snprintf(cmd, sizeof(cmd), "schtasks /Query /TN \"%s\" >nul 2>&1", TASK_NAME);
     
     if (system(cmd) == 0) {
-        printf("  ✓ Task '%s' đang hoạt động\n", TASK_NAME);
+        printf("  ✓ Task '%s' is active\n", TASK_NAME);
         
-        // Lấy thông tin chi tiết
+        // Get detailed info
         snprintf(cmd, sizeof(cmd), 
                  "schtasks /Query /TN \"%s\" /FO LIST /V 2>nul | findstr \"Status: Next Last\"",
                  TASK_NAME);
         system(cmd);
     } else {
-        printf("  ✗ Task chưa được cài đặt\n");
+        printf("  ✗ Task not installed\n");
     }
     
-    // Cấu hình Email
-    printf("\n4. Cấu hình Email:\n");
+    // Email Configuration
+    printf("\n4. Email Configuration:\n");
     printf("  • SMTP Server: %s:%d\n", SMTP_SERVER, SMTP_PORT);
-    printf("  • Từ: %s\n", EMAIL_FROM);
-    printf("  • Đến: %s\n", EMAIL_TO);
+    printf("  • From: %s\n", EMAIL_FROM);
+    printf("  • To: %s\n", EMAIL_TO);
     
     printf("\n");
 }
@@ -819,11 +844,11 @@ void show_menu() {
     printf("║   DEVICE TRACKER - ALL-IN-ONE v2.0     ║\n");
     printf("╚════════════════════════════════════════╝\n");
     printf("\n");
-    printf("  1. 🚀 Chạy Tracker (Gửi vị trí ngay)\n");
-    printf("  2. 📥 Cài đặt Auto-Start (Chạy khi boot)\n");
-    printf("  3. 🗑️  Gỡ cài đặt Auto-Start\n");
-    printf("  4. 📊 Kiểm tra trạng thái\n");
-    printf("  5. 🚪 Thoát\n");
+    printf("  1. 🚀 Run Tracker (Send location now)\n");
+    printf("  2. 📥 Install Auto-Start (Run on boot)\n");
+    printf("  3. 🗑️  Uninstall Auto-Start\n");
+    printf("  4. 📊 Check Status\n");
+    printf("  5. 🚪 Exit\n");
     printf("\n");
     printf("════════════════════════════════════════\n");
 }
@@ -832,39 +857,39 @@ void show_menu() {
 // MAIN
 // ============================================
 int main(int argc, char *argv[]) {
-    // Nếu chạy với --tracker (từ Task Scheduler)
+    // If run with --tracker (from Task Scheduler)
     if (argc > 1 && strcmp(argv[1], "--tracker") == 0) {
-        // Chạy tracker và thoát
+        // Run tracker and exit
         run_tracker();
         return 0;
     }
     
-    // Kiểm tra quyền Administrator
+    // Check Administrator privileges
     if (!check_admin()) {
         printf("\n");
         printf("════════════════════════════════════════\n");
-        printf("  ⚠️  CẢNH BÁO: CẦN QUYỀN ADMINISTRATOR\n");
+        printf("  ⚠️  WARNING: ADMINISTRATOR RIGHTS REQUIRED\n");
         printf("════════════════════════════════════════\n");
         printf("\n");
-        printf("Vui lòng:\n");
-        printf("  1. Đóng cửa sổ này\n");
-        printf("  2. Right-click vào All_In_One.exe\n");
-        printf("  3. Chọn 'Run as Administrator'\n");
+        printf("Please:\n");
+        printf("  1. Close this window\n");
+        printf("  2. Right-click on All_In_One.exe\n");
+        printf("  3. Select 'Run as Administrator'\n");
         printf("\n");
-        printf("Nhấn Enter để thoát...");
+        printf("Press Enter to exit...");
         getchar();
         return 1;
     }
     
-    // Menu chính
+    // Main menu
     int choice;
     while (1) {
         show_menu();
-        printf("Chọn chức năng (1-5): ");
+        printf("Select option (1-5): ");
         
         if (scanf("%d", &choice) != 1) {
             while (getchar() != '\n');
-            printf("\n✗ Lựa chọn không hợp lệ!\n");
+            printf("\n✗ Invalid choice!\n");
             Sleep(1000);
             continue;
         }
@@ -873,34 +898,34 @@ int main(int argc, char *argv[]) {
         switch (choice) {
             case 1:
                 run_tracker();
-                printf("\nNhấn Enter để tiếp tục...");
+                printf("\nPress Enter to continue...");
                 getchar();
                 break;
                 
             case 2:
                 install_startup();
-                printf("\nNhấn Enter để tiếp tục...");
+                printf("\nPress Enter to continue...");
                 getchar();
                 break;
                 
             case 3:
                 uninstall_startup();
-                printf("\nNhấn Enter để tiếp tục...");
+                printf("\nPress Enter to continue...");
                 getchar();
                 break;
                 
             case 4:
                 check_status();
-                printf("\nNhấn Enter để tiếp tục...");
+                printf("\nPress Enter to continue...");
                 getchar();
                 break;
                 
             case 5:
-                printf("\nTạm biệt!\n");
+                printf("\nGoodbye!\n");
                 return 0;
                 
             default:
-                printf("\n✗ Lựa chọn không hợp lệ!\n");
+                printf("\n✗ Invalid choice!\n");
                 Sleep(1000);
         }
     }
