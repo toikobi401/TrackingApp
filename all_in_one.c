@@ -286,29 +286,49 @@ int get_public_ip(char *ip, size_t size) {
     CURL *curl;
     CURLcode res;
     
-    FILE *fp = tmpfile();
-    if (!fp) return 0;
+    // Try multiple APIs with different methods
+    const char *apis[] = {
+        "https://api.ipify.org",
+        "http://api.ipify.org",  // HTTP fallback
+        "https://checkip.amazonaws.com",
+        "http://ifconfig.me/ip"
+    };
     
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.ipify.org");
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    for (int i = 0; i < 4; i++) {
+        FILE *fp = tmpfile();
+        if (!fp) continue;
         
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        
-        if (res == CURLE_OK) {
-            rewind(fp);
-            if (fgets(ip, size, fp)) {
-                ip[strcspn(ip, "\r\n")] = 0;
-                fclose(fp);
-                return 1;
+        curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, apis[i]);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);  // Increased timeout
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);  // Disable SSL verify
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+            
+            res = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
+            
+            if (res == CURLE_OK) {
+                rewind(fp);
+                if (fgets(ip, size, fp)) {
+                    ip[strcspn(ip, "\r\n")] = 0;
+                    // Remove any whitespace
+                    char *start = ip;
+                    while (*start == ' ' || *start == '\t') start++;
+                    if (start != ip) memmove(ip, start, strlen(start) + 1);
+                    
+                    fclose(fp);
+                    if (strlen(ip) > 0) {
+                        return 1;  // Success!
+                    }
+                }
             }
         }
+        fclose(fp);
     }
-    fclose(fp);
+    
     return 0;
 }
 
