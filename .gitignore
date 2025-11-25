@@ -1,0 +1,9 @@
+config.h
+*.exe
+*.o
+device_tracker
+.vscode/
+*.log
+*.dll
+*.zip
+curl-*/
