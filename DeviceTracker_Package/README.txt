@@ -57,6 +57,18 @@ Nếu muốn thay đổi email, cần rebuild từ source code!
 
 Option 2 (Cài đặt Auto-Start) sẽ:
 
+1. Copy All_In_One_Silent.exe vào C:\ProgramData\DeviceTracker\
+2. Copy libcurl-x64.dll và curl-ca-bundle.crt
+3. Tạo Task Scheduler tên "DeviceTracker"
+4. Task chạy 30 giây sau khi Windows boot
+5. Chương trình tự động:
+   • CHỜ VÔ HẠN nếu chưa có internet (không timeout)
+   • Kiểm tra internet mỗi 10 giây
+   • Khi có mạng → Thu thập thông tin → Gửi email → Thoát
+   
+KHÔNG CẦN LO nếu máy boot mà chưa có internet!
+Chương trình sẽ tự động chờ và gửi khi có mạng.
+
   1️⃣ Copy All_In_One.exe → C:\ProgramData\DeviceTracker\
   2️⃣ Copy libcurl-x64.dll → C:\ProgramData\DeviceTracker\
   3️⃣ Tải curl-ca-bundle.crt (nếu chưa có)
@@ -76,15 +88,15 @@ Subject: [Device Tracker] Thiết bị WAR-MACHINE đã khởi động
 
 === THÔNG TIN THIẾT BỊ ===
 
-Tên thiết bị: WAR-MACHINE
+Tên thiết bị: xxxxxxx
 Người dùng: PC
 Hệ điều hành: Windows OS
-Địa chỉ IP: 113.23.49.134
-MAC Address: C8:7F:54:A4:4A:05
-Vị trí: GPS: 21.341423, 106.487370 (Chính xác) ⭐
+Địa chỉ IP: xxxxxxx
+MAC Address: xxxxxxx
+Vị trí: GPS: xxxxxxx, xxxxxxx.487370 
 Thời gian: 2025-11-25 14:30:45
 
-Link Google Maps: https://www.google.com/maps?q=GPS: 21.341423, 106.487370
+Link Google Maps: https://www.google.com/maps?q=GPS: xxxxxxx, xxxxxxx
 
 ════════════════════════════════════════════════════════════════
 

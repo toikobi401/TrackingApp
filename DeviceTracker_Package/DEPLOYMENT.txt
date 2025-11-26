@@ -1,0 +1,114 @@
+════════════════════════════════════════════════════════════════
+   HƯỚNG DẪN DEPLOYMENT - DEVICE TRACKER
+════════════════════════════════════════════════════════════════
+
+📦 PACKAGE NÀY CHỨA TẤT CẢ FILE CẦN THIẾT!
+
+Không cần:
+  ✗ Compiler (gcc, MinGW)
+  ✗ Source code
+  ✗ PowerShell scripts
+  ✗ Internet (khi copy file)
+  
+Chỉ cần:
+  ✓ Windows 7/8/10/11
+  ✓ Quyền Administrator
+  ✓ Internet (khi chạy lần đầu)
+
+════════════════════════════════════════════════════════════════
+
+🚀 CÀI ĐẶT TRÊN MÁY MỚI (3 BƯỚC):
+
+【BƯỚC 1】Copy toàn bộ folder "DeviceTracker_Package" này
+         sang máy cần cài đặt (USB, network, email...)
+
+【BƯỚC 2】Trên máy mới:
+         • Right-click "All_In_One.exe"
+         • Chọn "Run as Administrator"
+
+【BƯỚC 3】Trong menu chọn "2" (Install Auto-Start)
+         → Đợi cài đặt hoàn tất
+         → XONG!
+
+════════════════════════════════════════════════════════════════
+
+✅ SAU KHI CÀI ĐẶT:
+
+• MỖI KHI khởi động Windows → Email tự động được gửi
+• KHÔNG LO nếu boot mà chưa có internet
+  → Chương trình tự động CHỜ VÔ HẠN
+  → Khi có mạng → Tự động gửi email
+
+════════════════════════════════════════════════════════════════
+
+📧 THÔNG TIN TRONG EMAIL:
+
+✓ Tên máy tính
+✓ Tên người dùng
+✓ Hệ điều hành
+✓ Địa chỉ IP public
+✓ MAC address
+✓ Vị trí GPS chính xác (nếu có)
+✓ Thời gian khởi động
+✓ Link Google Maps
+
+════════════════════════════════════════════════════════════════
+
+🔍 KIỂM TRA CÀI ĐẶT:
+
+1. Test ngay không cần reboot:
+   • Chọn Option 1 trong menu
+   • Kiểm tra email sau 20 giây
+
+2. Test auto-start:
+   • Khởi động lại máy
+   • Kiểm tra email sau ~1 phút
+
+3. Kiểm tra Task Scheduler:
+   • Win + R → gõ: taskschd.msc
+   • Tìm task "DeviceTracker"
+
+════════════════════════════════════════════════════════════════
+
+🗑️ GỠ CÀI ĐẶT:
+
+Cách 1 (Dễ nhất):
+  • Chạy All_In_One.exe as Administrator
+  • Chọn Option 3 (Uninstall)
+
+Cách 2 (Thủ công):
+  • Win + R → taskschd.msc
+  • Xóa task "DeviceTracker"
+  • Xóa folder: C:\ProgramData\DeviceTracker\
+
+════════════════════════════════════════════════════════════════
+
+⚠️ LƯU Ý QUAN TRỌNG:
+
+• Email cấu hình sẵn: ledat112228@gmail.com
+• Nếu muốn đổi email → Cần rebuild từ source code
+• Chương trình chạy với SYSTEM account (an toàn)
+• Không cần antivirus exclusion (chương trình hợp pháp)
+
+════════════════════════════════════════════════════════════════
+
+💡 TIPS:
+
+• Copy package vào USB để cài nhanh nhiều máy
+• Có thể cài trên máy không có internet trước
+  → Chương trình tự động gửi khi có mạng sau
+• Không cần uninstall khi upgrade
+  → Cài đè lên là được
+
+════════════════════════════════════════════════════════════════
+
+📞 HỖ TRỢ:
+
+• Xem README.txt để biết chi tiết đầy đủ
+• Xem QUICKSTART.txt cho hướng dẫn 30 giây
+• File LOG: C:\ProgramData\DeviceTracker\ (nếu có lỗi)
+
+════════════════════════════════════════════════════════════════
+
+Version: 2.0 (Infinite Wait Mode)
+Updated: November 2025
