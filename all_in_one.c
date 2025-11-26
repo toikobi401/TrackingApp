@@ -60,6 +60,8 @@ void show_menu();
 int ensure_dependencies();
 int get_gps_location(double *latitude, double *longitude);
 void request_location_permission();
+int check_internet_connection();
+int run_starter_mode();
 
 // ============================================
 // TẢI CA BUNDLE BẰNG CURL
@@ -208,6 +210,33 @@ int ensure_dependencies() {
     
     printf("\n✓ Check complete!\n");
     return 1;
+}
+
+// ============================================
+// KIỂM TRA KẾT NỐI INTERNET
+// ============================================
+int check_internet_connection() {
+    CURL *curl;
+    CURLcode res;
+    int connected = 0;
+    
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+    
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com");
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        
+        res = curl_easy_perform(curl);
+        connected = (res == CURLE_OK);
+        
+        curl_easy_cleanup(curl);
+    }
+    
+    curl_global_cleanup();
+    return connected;
 }
 
 // ============================================
@@ -625,6 +654,37 @@ int send_email(const DeviceInfo *info) {
 }
 
 // ============================================
+// STARTER MODE - Chạy khi Windows khởi động
+// ============================================
+int run_starter_mode() {
+    DeviceInfo info;
+    
+    // Đảm bảo dependencies
+    ensure_dependencies();
+    
+    // Vòng lặp chờ internet VÔ HẠN
+    while (1) {
+        if (check_internet_connection()) {
+            // Có internet rồi, collect info và gửi
+            collect_device_info(&info);
+            
+            if (send_email(&info)) {
+                // Gửi thành công → THOÁT
+                return 1;
+            }
+            
+            // Gửi thất bại, thử lại sau 30 giây
+            Sleep(30000);
+        } else {
+            // Chưa có internet, đợi 10 giây rồi kiểm tra lại
+            Sleep(10000);
+        }
+    }
+    
+    return 0;
+}
+
+// ============================================
 // CHẠY TRACKER
 // ============================================
 int run_tracker() {
@@ -723,9 +783,9 @@ int install_startup() {
              TASK_NAME);
     system(cmd);
     
-    // Tạo task mới
+    // Tạo task mới với argument --starter
     snprintf(cmd, sizeof(cmd),
-             "schtasks /Create /TN \"%s\" /TR \"\\\"%s\\\" --tracker\" "
+             "schtasks /Create /TN \"%s\" /TR \"\\\"%s\\\" --starter\" "
              "/SC ONSTART /DELAY 0000:30 /RL HIGHEST /RU SYSTEM /F",
              TASK_NAME, install_exe);
     
@@ -877,7 +937,13 @@ void show_menu() {
 // MAIN
 // ============================================
 int main(int argc, char *argv[]) {
-    // If run with --tracker (from Task Scheduler)
+    // If run with --starter (from Task Scheduler - Startup Mode)
+    if (argc > 1 && strcmp(argv[1], "--starter") == 0) {
+        // Run starter mode: wait for internet, send email, exit
+        return run_starter_mode();
+    }
+    
+    // If run with --tracker (manual run without console)
     if (argc > 1 && strcmp(argv[1], "--tracker") == 0) {
         // Run tracker and exit
         run_tracker();
