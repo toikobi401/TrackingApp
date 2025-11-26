@@ -1,9 +1,21 @@
+# Cấu hình nhạy cảm (sensitive config)
 config.h
+
+# Giữ lại file template
+!config.example.h
+
+# Build artifacts
 *.exe
 *.o
 device_tracker
+
+# IDE
 .vscode/
+
+# Logs
 *.log
+
+# Dependencies
 *.dll
 *.zip
 curl-*/

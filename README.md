@@ -44,7 +44,14 @@ TrackingApp/
 
 #### 1. Cấu hình Email
 
-Mở `config.h` và chỉnh sửa:
+Tạo file config từ template:
+
+```powershell
+# Copy file template
+Copy-Item "config.example.h" "config.h"
+
+# Sau đó mở config.h và chỉnh sửa:
+```
 
 ```c
 #define EMAIL_TO "your-email@gmail.com"
@@ -53,7 +60,9 @@ Mở `config.h` và chỉnh sửa:
 #define SMTP_PASSWORD "your-app-password"
 ```
 
-**Lưu ý**: Với Gmail, tạo App Password tại https://myaccount.google.com/apppasswords
+**Lưu ý**: 
+- File `config.h` chứa thông tin nhạy cảm và đã được thêm vào `.gitignore`
+- Với Gmail, tạo App Password tại https://myaccount.google.com/apppasswords
 
 #### 2. Build Project
 
